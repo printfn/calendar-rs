@@ -34,6 +34,7 @@ Syntax:
 
     calendar                # prints calendar for current month
     calendar 2021           # prints calendar for 2021
+    calendar January 2021   # prints calendar for January 2021
 
 ## License
 
