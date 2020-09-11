@@ -32,7 +32,7 @@ Example output (for 2020):
 
 Syntax:
 
-    calendar                # prints calendar for current year
+    calendar                # prints calendar for current month
     calendar 2021           # prints calendar for 2021
 
 ## License
