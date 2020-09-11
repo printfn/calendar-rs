@@ -93,23 +93,27 @@ const fn bottom_row_is_completely_empty(year: Year, mr: usize) -> bool {
         && bottom_row_empty(year, 2 * 4 + mr + 1)
 }
 
+fn print_row(year: Year, row: usize) {
+    if row % 6 == 5 && bottom_row_is_completely_empty(year, row / 6) {
+        return; // skip sixth row
+    }
+    for mc in 0..3 {
+        let month = mc * 4 + row / 6 + 1;
+        if mc > 0 {
+            print!("  ");
+        }
+        print_month_row(year, month, row as i64 % 6);
+    }
+    println!();
+}
+
 fn print_calendar(year: Year) {
     println!(
         "Su Mo Tu We Th Fr Sa  Su Mo   {:^4}   Fr Sa  Su Mo Tu We Th Fr Sa",
         year
     );
     for row in 0..24 {
-        if row % 6 == 5 && bottom_row_is_completely_empty(year, row / 6) {
-            continue; // skip sixth row
-        }
-        for mc in 0..3 {
-            let month = mc * 4 + row / 6 + 1;
-            if mc > 0 {
-                print!("  ");
-            }
-            print_month_row(year, month, row as i64 % 6);
-        }
-        println!();
+        print_row(year, row);
     }
 }
 
