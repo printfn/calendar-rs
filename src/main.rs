@@ -88,9 +88,9 @@ const fn bottom_row_empty(year: Year, month: Month) -> bool {
 }
 
 const fn bottom_row_is_completely_empty(year: Year, mr: usize) -> bool {
-    bottom_row_empty(year, mr * 3 + 1)
-        && bottom_row_empty(year, mr * 3 + 2)
-        && bottom_row_empty(year, mr * 3 + 3)
+    bottom_row_empty(year, 0 * 4 + mr + 1)
+        && bottom_row_empty(year, 1 * 4 + mr + 1)
+        && bottom_row_empty(year, 2 * 4 + mr + 1)
 }
 
 fn print_calendar(year: Year) {
@@ -104,7 +104,7 @@ fn print_calendar(year: Year) {
                 break; // skip sixth row
             }
             for mc in 0..3 {
-                let month = mr * 3 + mc + 1;
+                let month = mc * 4 + mr + 1;
                 if mc > 0 {
                     print!("  ");
                 }
