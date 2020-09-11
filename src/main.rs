@@ -43,31 +43,42 @@ const fn day_of_week_of_first_of_month(mut year: Year, mut month: Month) -> DayO
         num_days += num_days_in_year(year);
     }
     let day_of_week = 5; // Friday
-    (day_of_week + num_days) % 7
+    (day_of_week + num_days + 6) % 7 + 1
+}
+
+/// print the specified month, or print whitespace if passed 0
+fn print_month_row_space_2(month: Month) {
+    let months = [
+        "   ", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    print!("{}", months[month]);
 }
 
 fn print_month_row(year: Year, month: Month, row: i64) {
     let column_of_first = day_of_week_of_first_of_month(year, month);
     let mut day = 1 + 7 * row - column_of_first as i64;
     for i in 0..7 {
-        if day < 1 || day > num_days_in_month(year, month) as i64 {
-            print!("  ");
-        } else {
+        if row == 0 && i == 0 {
+            print_month_row_space_2(month);
+        } else if row == 0 && i == 1 {
+            if day == 1 {
+                print!("1 ");
+            }
+            day += 1;
+            continue;
+        }
+        if day >= 1 && day <= num_days_in_month(year, month) as i64 {
             print!("{:>2}", day);
+        } else if row == 0 && day == 0 && i == 0 {
+            // do nothing
+        } else {
+            print!("  ");
         }
         if i != 6 {
             print!(" ");
         }
         day += 1;
     }
-}
-
-/// print the specified month, or print whitespace if passed 0
-fn print_month_row_space(month: Month) {
-    let months = [
-        "   ", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    print!("  {} ", months[month]);
 }
 
 const fn bottom_row_empty(year: Year, month: Month) -> bool {
@@ -84,7 +95,7 @@ const fn bottom_row_is_completely_empty(year: Year, mr: usize) -> bool {
 
 fn print_calendar(year: Year) {
     println!(
-        "      Su Mo Tu We Th Fr Sa      Su Mo   {:^4}   Fr Sa      Su Mo Tu We Th Fr Sa",
+        "Su Mo Tu We Th Fr Sa  Su Mo   {:^4}   Fr Sa  Su Mo Tu We Th Fr Sa",
         year
     );
     for mr in 0..4 {
@@ -94,7 +105,9 @@ fn print_calendar(year: Year) {
             }
             for mc in 0..3 {
                 let month = mr * 3 + mc + 1;
-                print_month_row_space(if row == 0 { month } else { 0 });
+                if mc > 0 {
+                    print!("  ");
+                }
                 print_month_row(year, month, row);
             }
             println!();
