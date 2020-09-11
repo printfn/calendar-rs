@@ -162,13 +162,13 @@ fn print_month(year: Year, month: Month) {
     }
 }
 
-fn get_current_year() -> Result<(Year, Month), ()> {
+fn get_current_year() -> Result<(Year, Month), String> {
     use std::time::SystemTime;
     let mut year = 1970;
     let mut month = 1;
     let mut seconds_since_epoch = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
-        .map_err(|_| ())?
+        .map_err(|_| "Unable to get current time".to_string())?
         .as_secs();
     while seconds_since_epoch >= num_days_in_year(year) * 86400 {
         seconds_since_epoch -= num_days_in_year(year) * 86400;
@@ -181,20 +181,68 @@ fn get_current_year() -> Result<(Year, Month), ()> {
     Ok((year, month))
 }
 
-fn main() {
-    if let Some(year_str) = std::env::args().nth(1) {
-        if let Ok(selected_year) = year_str.parse::<Year>() {
-            if selected_year >= 1 && selected_year <= 9999 {
-                print_calendar(selected_year)
-            } else {
-                eprintln!("Please specify a valid year between 1 and 9999")
+fn try_parse_month(input: &str) -> Result<Month, String> {
+    let input = input.trim().to_lowercase();
+    Ok(match input.as_str() {
+        "january" | "jan" => 1,
+        "february" | "feb" => 2,
+        "march" | "mar" => 3,
+        "april" | "apr" => 4,
+        "may" => 5,
+        "june" | "jun" => 6,
+        "july" | "jul" => 7,
+        "august" | "aug" => 8,
+        "september" | "sep" => 9,
+        "october" | "oct" => 10,
+        "november" | "nov" => 11,
+        "december" | "dec" => 12,
+        _ => {
+            let err = format!("{} is neither a month number (1..12) nor a name", input);
+            let month = input.parse::<Month>().map_err(|_| err.clone())?;
+            if month < 1 || month > 12 {
+                return Err(err);
             }
-        } else {
-            eprintln!("Please specify a valid year between 1 and 9999")
+            month
         }
-    } else if let Ok((current_year, current_month)) = get_current_year() {
-        print_month(current_year, current_month);
+    })
+}
+
+fn try_parse_year(input: &str) -> Result<Year, String> {
+    if let Ok(selected_year) = input.parse::<Year>() {
+        if selected_year >= 1 && selected_year <= 9999 {
+            Ok(selected_year)
+        } else {
+            Err("Please specify a valid year between 1 and 9999".to_string())
+        }
     } else {
-        eprintln!("Unable to get current time")
+        Err("Please specify a valid year between 1 and 9999".to_string())
+    }
+}
+
+fn calendar() -> Result<(), String> {
+    let args: Vec<String> = std::env::args().collect();
+    match args.len() {
+        0 | 1 => {
+            let (current_year, current_month) = get_current_year()?;
+            print_month(current_year, current_month);
+        },
+        2 => {
+            let year = try_parse_year(args[1].as_str())?;
+            print_calendar(year);
+        }
+        3 => {
+            let month = try_parse_month(args[1].as_str())?;
+            let year = try_parse_year(args[2].as_str())?;
+            print_month(year, month);
+        },
+        _ => return Err("Invalid arguments".to_string())
+    }
+    Ok(())
+}
+
+fn main() {
+    match calendar() {
+        Ok(()) => (),
+        Err(msg) => eprintln!("{}", msg),
     }
 }

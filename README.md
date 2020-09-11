@@ -1,6 +1,6 @@
 # Calendar
 
-Very simple command-line calendar based on `cal`.
+Command-line calendar based on `cal`.
 
 It uses a compact layout that fits in 65x23 characters.
 
