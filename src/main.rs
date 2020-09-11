@@ -98,20 +98,18 @@ fn print_calendar(year: Year) {
         "Su Mo Tu We Th Fr Sa  Su Mo   {:^4}   Fr Sa  Su Mo Tu We Th Fr Sa",
         year
     );
-    for mr in 0..4 {
-        for row in 0..6 {
-            if row == 5 && bottom_row_is_completely_empty(year, mr) {
-                break; // skip sixth row
-            }
-            for mc in 0..3 {
-                let month = mc * 4 + mr + 1;
-                if mc > 0 {
-                    print!("  ");
-                }
-                print_month_row(year, month, row);
-            }
-            println!();
+    for row in 0..24 {
+        if row % 6 == 5 && bottom_row_is_completely_empty(year, row / 6) {
+            continue; // skip sixth row
         }
+        for mc in 0..3 {
+            let month = mc * 4 + row / 6 + 1;
+            if mc > 0 {
+                print!("  ");
+            }
+            print_month_row(year, month, row as i64 % 6);
+        }
+        println!();
     }
 }
 
