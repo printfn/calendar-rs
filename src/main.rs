@@ -28,7 +28,11 @@ const fn num_days_in_month(year: Year, month: Month) -> u64 {
     }
 }
 
-const fn day_of_week_of_first_of_month(mut year: Year, mut month: Month) -> DayOfWeek {
+const fn day_of_week_of_first_of_month(
+    mut year: Year,
+    mut month: Month,
+    show_month_name_inline: bool,
+) -> DayOfWeek {
     let mut num_days = 70_000_000; // number of days shifted forward
     while month > 1 {
         month -= 1;
@@ -43,7 +47,11 @@ const fn day_of_week_of_first_of_month(mut year: Year, mut month: Month) -> DayO
         num_days += num_days_in_year(year);
     }
     let day_of_week = 5; // Friday
-    (day_of_week + num_days + 6) % 7 + 1
+    if show_month_name_inline {
+        (day_of_week + num_days + 6) % 7 + 1
+    } else {
+        (day_of_week + num_days) % 7
+    }
 }
 
 /// print the specified month, or print whitespace if passed 0
@@ -54,22 +62,24 @@ fn print_month_row_space_2(month: Month) {
     print!("{}", months[month]);
 }
 
-fn print_month_row(year: Year, month: Month, row: i64) {
-    let column_of_first = day_of_week_of_first_of_month(year, month);
+fn print_month_row(year: Year, month: Month, row: i64, show_month_name_inline: bool) {
+    let column_of_first = day_of_week_of_first_of_month(year, month, show_month_name_inline);
     let mut day = 1 + 7 * row - column_of_first as i64;
     for i in 0..7 {
-        if row == 0 && i == 0 {
-            print_month_row_space_2(month);
-        } else if row == 0 && i == 1 {
-            if day == 1 {
-                print!("1 ");
+        if show_month_name_inline {
+            if row == 0 && i == 0 {
+                print_month_row_space_2(month);
+            } else if row == 0 && i == 1 {
+                if day == 1 {
+                    print!("1 ");
+                }
+                day += 1;
+                continue;
             }
-            day += 1;
-            continue;
         }
         if day >= 1 && day <= num_days_in_month(year, month) as i64 {
             print!("{:>2}", day);
-        } else if row == 0 && day == 0 && i == 0 {
+        } else if show_month_name_inline && row == 0 && day == 0 && i == 0 {
             // do nothing
         } else {
             print!("  ");
@@ -81,21 +91,21 @@ fn print_month_row(year: Year, month: Month, row: i64) {
     }
 }
 
-const fn bottom_row_empty(year: Year, month: Month) -> bool {
-    let column_of_first = day_of_week_of_first_of_month(year, month);
+const fn bottom_row_empty(year: Year, month: Month, show_month_name_inline: bool) -> bool {
+    let column_of_first = day_of_week_of_first_of_month(year, month, show_month_name_inline);
     let day = 1 + 7 * 5 - column_of_first;
     day > num_days_in_month(year, month)
 }
 
-const fn skipped_rows(year: Year, row: usize, mc: usize) -> usize {
+const fn skipped_rows(year: Year, row: usize, mc: usize, show_month_name_inline: bool) -> usize {
     let mut result = 0;
-    if row >= 5 && bottom_row_empty(year, mc * 4 + 1) {
+    if row >= 5 && bottom_row_empty(year, mc * 4 + 1, show_month_name_inline) {
         result += 1;
     }
-    if row + result >= 11 && bottom_row_empty(year, mc * 4 + 2) {
+    if row + result >= 11 && bottom_row_empty(year, mc * 4 + 2, show_month_name_inline) {
         result += 1;
     }
-    if row + result >= 17 && bottom_row_empty(year, mc * 4 + 3) {
+    if row + result >= 17 && bottom_row_empty(year, mc * 4 + 3, show_month_name_inline) {
         result += 1;
     }
     result
@@ -103,7 +113,7 @@ const fn skipped_rows(year: Year, row: usize, mc: usize) -> usize {
 
 fn print_row(year: Year, row: usize) {
     for mc in 0..3 {
-        let adjusted_row = row + skipped_rows(year, row, mc);
+        let adjusted_row = row + skipped_rows(year, row, mc, true);
         if adjusted_row >= 24 {
             return;
         }
@@ -111,7 +121,7 @@ fn print_row(year: Year, row: usize) {
         if mc > 0 {
             print!("|");
         }
-        print_month_row(year, month, adjusted_row as i64 % 6);
+        print_month_row(year, month, adjusted_row as i64 % 6, true);
     }
     println!();
 }
@@ -127,12 +137,27 @@ fn print_calendar(year: Year) {
 }
 
 fn print_month(year: Year, month: Month) {
+    match month {
+        01 => println!("    January {:^4}    ", year),
+        02 => println!("   February {:^4}    ", year),
+        03 => println!("     March {:^4}     ", year),
+        04 => println!("     April {:^4}     ", year),
+        05 => println!("      May {:^4}      ", year),
+        06 => println!("     June {:^4}      ", year),
+        07 => println!("     July {:^4}      ", year),
+        08 => println!("    August {:^4}     ", year),
+        09 => println!("   September {:^4}   ", year),
+        10 => println!("    October {:^4}    ", year),
+        11 => println!("   November {:^4}    ", year),
+        12 => println!("   December {:^4}    ", year),
+        _ => panic!("Unknown month {:^4}", month),
+    }
     println!("Su Mo Tu We Th Fr Sa");
     for row in 0..6 {
-        if row == 5 && bottom_row_empty(year, month) {
+        if row == 5 && bottom_row_empty(year, month, false) {
             break;
         }
-        print_month_row(year, month, row);
+        print_month_row(year, month, row, false);
         println!();
     }
 }
