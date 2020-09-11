@@ -87,22 +87,31 @@ const fn bottom_row_empty(year: Year, month: Month) -> bool {
     day > num_days_in_month(year, month)
 }
 
-const fn bottom_row_is_completely_empty(year: Year, mr: usize) -> bool {
-    bottom_row_empty(year, 0 * 4 + mr + 1)
-        && bottom_row_empty(year, 1 * 4 + mr + 1)
-        && bottom_row_empty(year, 2 * 4 + mr + 1)
+const fn skipped_rows(year: Year, row: usize, mc: usize) -> usize {
+    let mut result = 0;
+    if row >= 5 && bottom_row_empty(year, mc * 4 + 1) {
+        result += 1;
+    }
+    if row + result >= 11 && bottom_row_empty(year, mc * 4 + 2) {
+        result += 1;
+    }
+    if row + result >= 17 && bottom_row_empty(year, mc * 4 + 3) {
+        result += 1;
+    }
+    result
 }
 
 fn print_row(year: Year, row: usize) {
-    if row % 6 == 5 && bottom_row_is_completely_empty(year, row / 6) {
-        return; // skip sixth row
-    }
     for mc in 0..3 {
-        let month = mc * 4 + row / 6 + 1;
+        let adjusted_row = row + skipped_rows(year, row, mc);
+        if adjusted_row >= 24 {
+            return;
+        }
+        let month = mc * 4 + adjusted_row / 6 + 1;
         if mc > 0 {
             print!("  ");
         }
-        print_month_row(year, month, row as i64 % 6);
+        print_month_row(year, month, adjusted_row as i64 % 6);
     }
     println!();
 }
