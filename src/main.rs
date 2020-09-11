@@ -119,7 +119,7 @@ fn print_row(year: Year, row: usize) {
         }
         let month = mc * 4 + adjusted_row / 6 + 1;
         if mc > 0 {
-            print!("|");
+            print!("  ");
         }
         print_month_row(year, month, adjusted_row as i64 % 6, true);
     }
@@ -128,7 +128,7 @@ fn print_row(year: Year, row: usize) {
 
 fn print_calendar(year: Year) {
     println!(
-        "Su Mo Tu We Th Fr Sa|Su Mo   {:^4}   Fr Sa|Su Mo Tu We Th Fr Sa",
+        "Su Mo Tu We Th Fr Sa  Su Mo   {:^4}   Fr Sa  Su Mo Tu We Th Fr Sa",
         year
     );
     for row in 0..24 {
