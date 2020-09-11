@@ -126,9 +126,21 @@ fn print_calendar(year: Year) {
     }
 }
 
-fn get_current_year() -> Result<Year, ()> {
+fn print_month(year: Year, month: Month) {
+    println!("Su Mo Tu We Th Fr Sa");
+    for row in 0..6 {
+        if row == 5 && bottom_row_empty(year, month) {
+            break;
+        }
+        print_month_row(year, month, row);
+        println!();
+    }
+}
+
+fn get_current_year() -> Result<(Year, Month), ()> {
     use std::time::SystemTime;
     let mut year = 1970;
+    let mut month = 1;
     let mut seconds_since_epoch = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .map_err(|_| ())?
@@ -137,7 +149,11 @@ fn get_current_year() -> Result<Year, ()> {
         seconds_since_epoch -= num_days_in_year(year) * 86400;
         year += 1;
     }
-    Ok(year)
+    while seconds_since_epoch >= num_days_in_month(year, month) * 86400 {
+        seconds_since_epoch -= num_days_in_month(year, month) * 86400;
+        month += 1;
+    }
+    Ok((year, month))
 }
 
 fn main() {
@@ -151,8 +167,8 @@ fn main() {
         } else {
             eprintln!("Please specify a valid year between 1 and 9999")
         }
-    } else if let Ok(current_year) = get_current_year() {
-        print_calendar(current_year)
+    } else if let Ok((current_year, current_month)) = get_current_year() {
+        print_month(current_year, current_month);
     } else {
         eprintln!("Unable to get current time")
     }
